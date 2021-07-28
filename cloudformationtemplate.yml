@@ -11,9 +11,6 @@ Parameters:
   Key:
     Type: String
     Description: The key used to access the instance.
-  UserData:
-    Type: String
-    Description: The key used to access the instance.
 Resources:
   VPC:
     Type: AWS::EC2::VPC
@@ -24,7 +21,7 @@ Resources:
       InstanceTenancy: default
       Tags:
         - Key: Name
-          Value: RHEL-8.3.0 Target VPC
+          Value: Linux VPC
   InternetGateway:
     Type: AWS::EC2::InternetGateway
   VPCGatewayAttachment:
@@ -58,17 +55,17 @@ Resources:
   InstanceSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupName: "python-s3-upload Target Group"
-      GroupDescription: "Tentacle traffic in from hosted static ips, and RDP in from a personal workstation"
+      GroupName: "Internet Group"
+      GroupDescription: "SSH and web traffic in, all traffic out."
       VpcId: !Ref VPC
       SecurityGroupIngress:
         - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
+          FromPort: '80'
+          ToPort: '80'
           CidrIp: 0.0.0.0/0
         - IpProtocol: tcp
-          FromPort: 22
-          ToPort: 22
+          FromPort: '22'
+          ToPort: '22'
           CidrIp: 0.0.0.0/0
       SecurityGroupEgress:
         - IpProtocol: -1
@@ -81,26 +78,44 @@ Resources:
   pythons3upload:
     Type: 'AWS::EC2::Instance'
     Properties:
+      SubnetId: !Ref Subnet
       ImageId: !Ref AMI
       InstanceType:
         Ref: InstanceTypeParameter
       KeyName: !Ref Key
-      SubnetId: !Ref Subnet
       SecurityGroupIds:
         - Ref: InstanceSecurityGroup
       BlockDeviceMappings:
-        - DeviceName: /dev/sda1
+        - DeviceName: /dev/xvda
           Ebs:
             VolumeSize: 100
-      UserData: !Ref UserData
       Tags:
         -
           Key: Appplication
-          Value: pythons3upload
+          Value: Linux Server
+      UserData:
+        Fn::Base64: |
+          #!/bin/bash
+          dnf update -y
+          dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo
+          dnf list docker-ce
+          dnf install docker-ce --nobest -y
+          systemctl start docker
+          systemctl enable docker
+          docker --version
+          dnf install curl -y
+          curl -L "https://github.com/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose      
+          chmod +x /usr/local/bin/docker-compose
+          yum install -y git
+          sleep 30
+          git clone https://github.com/Arvind-Jagirala/ITGlue_Repo.git
+          cd ITGlue_Repo
+          docker-compose up --build
+          sleep 90
 Outputs:
   PublicIp:
     Value:
       Fn::GetAtt:
         - pythons3upload
         - PublicIp
-    Description: PublicIp of the instance
+    Description: Server's PublicIp Address
