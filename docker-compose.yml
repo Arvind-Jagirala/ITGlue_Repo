@@ -1,0 +1,9 @@
+version: '3'
+services:
+  awsupload:
+    image: awsupload
+    command: python s3_upload.py
+    restart: unless-stopped
+    build: .
+    ports:
+      - "80:5000"
