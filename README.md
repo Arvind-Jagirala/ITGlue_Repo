@@ -1,5 +1,4 @@
-README file:
-NOTE : This repo contains the source code of the webapp written using python flask which uploads the files to S3 and responds with the public url. It also has the Cloudformation template for spinning resources on AWS along with ansible playbook and jenkins pipeline script for ci/cd. The given task can be achieved in different ways. I have built this application by using two approaches using the tech stack - Jenkins, Ansible, Docker, Git, AWS CloudFormation.
+This repo contains the source code of the webapp written using python flask which uploads the files to S3 and responds with the public url. It also has the Cloudformation template for spinning resources on AWS along with ansible playbook and jenkins pipeline script for ci/cd. The given task can be achieved in different ways. I have built this application by using two approaches using the tech stack - Jenkins, Ansible, Docker, Git, AWS CloudFormation.
 
 **Prerequisites for both the approaches:**
 1. AWS CLI Installed and Configured on the server from where you execute CLoudFormation template.
