@@ -13,7 +13,7 @@ This repo contains the source code of the webapp written using python flask whic
 **Detailed steps to perform:**
 1. Run the CloudFormation template(cfscript.yml) provided in Git repo from the AWS CLI using the below command by replacing with your key-value.
    	
-      aws cloudformation create-stack --stack-name ec2-stack --template-body file://cfscript.yml --parameters ParameterKey=Key,ParameterValue=Test_Ec2_Private
+      >aws cloudformation create-stack --stack-name ec2-stack --template-body file://cfscript.yml --parameters ParameterKey=Key,ParameterValue=Test_Ec2_Private
       ![stack-creation](https://user-images.githubusercontent.com/33229776/127478053-0e087f79-8709-454d-8a7d-c9c081d3dc50.jpeg)
 
 2. After the Ec2 is spinned up by CloudFormation template, connect to it and check the logs (tail -500f /var/log/messages) to validate that the cloud-init script is completed. This will take about 10 minutes to install the docker, build the image, deploy  and start the application. Use below commands to check the image created and running container.
@@ -45,7 +45,7 @@ In addition to the above mentioned prerequisites, we need a Jenkins server with 
 **Detailed steps to perform:**
 1. Provision of resources is done by CloudFormation. Run the CloudFormation template(cloudformationtemplate.yml) provided in Git repo from the AWS CLI using the below command by replacing with your key-value.
    	
-      aws cloudformation create-stack --stack-name ec2-stack --template-body file://cloudformationtemplate.yml --parameters ParameterKey=Key,ParameterValue=Test_Ec2_Private
+      #aws cloudformation create-stack --stack-name ec2-stack --template-body file://cloudformationtemplate.yml --parameters ParameterKey=Key,ParameterValue=Test_Ec2_Private
 
 **Note:** Before running the above command, replace the public key mentioned under userdata in cloudformationtemplate.yml with your ansible server’s public key.
 2. Once the Ec2 is spinned up by CloudFormation template, connect to it and check the logs (tail -500f /var/log/messages) to validate that the cloud-init script is completed. 
