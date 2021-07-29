@@ -4,8 +4,8 @@
   hosts: ec2
   tasks:
     - name: Copy the docker and application setup script in the server
-      copy:
-        src: /ITGlue_Repo/dockersetup.sh
+      get_url:
+        url: https://github.com/Arvind-Jagirala/ITGlue_Repo/blob/main/dockersetup.sh
         dest: /opt/dockersetup.sh
         owner: root
         group: root
