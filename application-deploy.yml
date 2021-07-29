@@ -1,0 +1,15 @@
+---
+
+- name: Copy the docker installables and deploy the docker-compose application 
+  hosts: ec2
+  tasks:
+    - name: Copy the docker and application setup script in the server
+      copy:
+        src: /ITGlue_Repo/dockersetup.sh
+        dest: /opt/dockersetup.sh
+        owner: root
+        group: root
+        mode: 0755
+
+    - name: Run docker and application in the server
+      shell: /opt/dockersetup.sh
