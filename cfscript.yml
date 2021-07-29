@@ -1,0 +1,150 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  InstanceTypeParameter:
+    Type: String
+    Default: t3a.medium
+    Description: Enter instance size. Default is t3a.medium.
+  AMI:
+    Type: String
+    Default: ami-08523c5075ba75813
+    Description:  AMI image name RHEL-8.3.0_HVM-20201031-x86_64-0-Hourly2-GP2
+  Key:
+    Type: String
+    Description: The key used to access the instance.
+  BucketName:
+    Type: String
+    Default: itglue-uploads
+    Description: Bucket name to upload the files     
+Resources:
+  AWSTemplateFormatVersion: 2010-09-09
+Resources:
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref BucketName
+      AccessControl: PublicRead
+  BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      PolicyDocument:
+        Id: MyPolicy       
+        Version: 2012-10-17
+        Statement:
+          - Sid: PublicReadForGetBucketObjects
+            Effect: Allow
+            Principal: '*'
+            Action: 's3:GetObject'
+            Resource: !Join 
+              - ''
+              - - 'arn:aws:s3:::'
+                - !Ref S3Bucket
+                - /*
+      Bucket: !Ref S3Bucket
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: Linux VPC
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+  VPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+  Subnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: ca-central-1a
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.0.0/24
+      MapPublicIpOnLaunch: true
+  RouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+  InternetRoute:
+    Type: AWS::EC2::Route
+    DependsOn: InternetGateway
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+      RouteTableId: !Ref RouteTable
+  SubnetARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref RouteTable
+      SubnetId: !Ref Subnet
+  InstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: "Internet Group"
+      GroupDescription: "SSH and web traffic in, all traffic out."
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '80'
+          ToPort: '80'
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: '22'
+          ToPort: '22'
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+  ElasticIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+      InstanceId: !Ref pythons3upload
+  pythons3upload:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      SubnetId: !Ref Subnet
+      ImageId: !Ref AMI
+      InstanceType:
+        Ref: InstanceTypeParameter
+      KeyName: !Ref Key
+      SecurityGroupIds:
+        - Ref: InstanceSecurityGroup
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeSize: 100
+      Tags:
+        -
+          Key: Appplication
+          Value: Linux Server
+      UserData:
+        Fn::Base64: |
+          #!/bin/bash
+          yum install -y python36
+          echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDK5nSbpKlrF984hxw+xpqoV9PeVKmM6D3UR11jGwRpy+FhMrxmzWMhMW3IRelTtEfIW3wTezVfZEJksDDvcWLAWWVwXXw8vm63eH3wrLxWjm+it9EzOEMllkJ7AmeBFkAr1g5k+ayd+LHQh4NrdpOA76rt8z6U5cNiCKnY5/tfbZuUFNsTknC20tX+GWu7f7RdCvJA3GAc9i/zkJk8T4dRBTc0neViFBSW1T+7bMeQiyvKnjjBRRT6KqAW7We4/0gNOiKs66h7F69iXWog27wXe6OjVeA9co6H0P93gQ0x94lL/s9FBcAxrD6LEModJQRPCUl260aKx5QtUoqcl/L6sU/w27XcCrMxzacJ/0h4biskXU6C3xYrKk6GqgH6tl5rrNvtoanlHLIIQZ0n7RtRB3/nMpF7aNPwXcgfPu2yBWzQotm1wUtpVarBAuf1H1qrr2ZPkt2lAzrSWF0pTzsHZtbOJGs0w2EiWQEXFGkiUeypxpNiHai0dxLyEH9Uucc= root@ip-10-10-0-6.ca-central-1.compute.internal'>> ~/.ssh/authorized_keys
+          dnf update -y
+          dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo
+          dnf list docker-ce
+          dnf install docker-ce --nobest -y
+          systemctl start docker
+          systemctl enable docker
+          docker --version
+          dnf install curl -y
+          curl -L "https://github.com/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          chmod +x /usr/local/bin/docker-compose
+          docker-compose --version
+          yum install -y git
+          git clone https://github.com/Arvind-Jagirala/ITGlue_Repo.git
+          cd ITGlue_Repo
+          docker-compose up --build
+Outputs:
+  PublicIp:
+    Value:
+      Fn::GetAtt:
+        - pythons3upload
+        - PublicIp
+    Description: Server's PublicIp Addres
