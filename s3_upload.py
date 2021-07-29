@@ -12,7 +12,7 @@ s3 = boto3.client('s3',
                   aws_access_key_id='AKIAQ5RARCW7R3SCI4NM',
                   aws_secret_access_key= '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',
                   )
-BUCKET_NAME='itgluetest'
+BUCKET_NAME='itglue-uploads'
 
 @app.route('/',methods=['GET'])
 def index():
