@@ -44,7 +44,7 @@ Access link screenshot
 In addition to the above mentioned prerequisites, we need a Jenkins server with Ansible installed in it that runs a pipeline job to deploy the application in the Application server created by cloudformation..
 **Detailed steps to perform:**
 1. Provision of resources is done by CloudFormation. Run the CloudFormation template(cloudformationtemplate.yml) provided in Git repo from the AWS CLI using the below command by replacing with your key-value.
-   	# aws cloudformation create-stack --stack-name ec2-stack --template-body file://cloudformationtemplate.yml --parameters ParameterKey=Key,ParameterValue=Test_Ec2_Private
+   	*# aws cloudformation create-stack --stack-name ec2-stack --template-body file://cloudformationtemplate.yml --parameters ParameterKey=Key,ParameterValue=Test_Ec2_Private
 
 **Note:** Before running the above command, replace the public key mentioned under userdata in cloudformationtemplate.yml with your ansible server’s public key.
 2. Once the Ec2 is spinned up by CloudFormation template, connect to it and check the logs (tail -500f /var/log/messages) to validate that the cloud-init script is completed. 
