@@ -5,11 +5,12 @@
   tasks:
     - name: Copy the docker and application setup script in the server
       get_url:
-        url: https://github.com/Arvind-Jagirala/ITGlue_Repo/blob/main/dockersetup.sh
+        url: https://raw.githubusercontent.com/Arvind-Jagirala/ITGlue_Repo/main/dockersetup.sh
         dest: /opt/dockersetup.sh
         owner: root
         group: root
         mode: 0755
 
-    - name: Run docker and application in the server
-      shell: /opt/dockersetup.sh
+    - name: Run docker in the server
+      shell: nohup /opt/dockersetup.sh > /dev/null 2>&1 &
+

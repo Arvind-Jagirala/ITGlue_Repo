@@ -11,7 +11,35 @@ Parameters:
   Key:
     Type: String
     Description: The key used to access the instance.
+  BucketName:
+    Type: String
+    Default: itglue-uploads
+    Description: Bucket name to upload the files
 Resources:
+  AWSTemplateFormatVersion: 2010-09-09
+Resources:
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref BucketName
+      AccessControl: PublicRead
+  BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      PolicyDocument:
+        Id: MyPolicy
+        Version: 2012-10-17
+        Statement:
+          - Sid: PublicReadForGetBucketObjects
+            Effect: Allow
+            Principal: '*'
+            Action: 's3:GetObject'
+            Resource: !Join 
+              - ''
+              - - 'arn:aws:s3:::'
+                - !Ref S3Bucket
+                - /*
+      Bucket: !Ref S3Bucket
   VPC:
     Type: AWS::EC2::VPC
     Properties:
@@ -96,21 +124,8 @@ Resources:
       UserData:
         Fn::Base64: |
           #!/bin/bash
-          dnf update -y
-          dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo
-          dnf list docker-ce
-          dnf install docker-ce --nobest -y
-          systemctl start docker
-          systemctl enable docker
-          docker --version
-          dnf install curl -y
-          curl -L "https://github.com/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose      
-          chmod +x /usr/local/bin/docker-compose
-          yum install -y git
-          sleep 30
-          git clone https://github.com/Arvind-Jagirala/ITGlue_Repo.git
-          cd ITGlue_Repo
-          docker-compose up --build
+          yum install -y python36
+          echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDK5nSbpKlrF984hxw+xpqoV9PeVKmM6D3UR11jGwRpy+FhMrxmzWMhMW3IRelTtEfIW3wTezVfZEJksDDvcWLAWWVwXXw8vm63eH3wrLxWjm+it9EzOEMllkJ7AmeBFkAr1g5k+ayd+LHQh4NrdpOA76rt8z6U5cNiCKnY5/tfbZuUFNsTknC20tX+GWu7f7RdCvJA3GAc9i/zkJk8T4dRBTc0neViFBSW1T+7bMeQiyvKnjjBRRT6KqAW7We4/0gNOiKs66h7F69iXWog27wXe6OjVeA9co6H0P93gQ0x94lL/s9FBcAxrD6LEModJQRPCUl260aKx5QtUoqcl/L6sU/w27XcCrMxzacJ/0h4biskXU6C3xYrKk6GqgH6tl5rrNvtoanlHLIIQZ0n7RtRB3/nMpF7aNPwXcgfPu2yBWzQotm1wUtpVarBAuf1H1qrr2ZPkt2lAzrSWF0pTzsHZtbOJGs0w2EiWQEXFGkiUeypxpNiHai0dxLyEH9Uucc= root@ip-10-10-0-6.ca-central-1.compute.internal'>> ~/.ssh/authorized_keys
           sleep 90
 Outputs:
   PublicIp:
