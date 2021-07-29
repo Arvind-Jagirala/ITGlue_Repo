@@ -11,5 +11,4 @@ curl -L "https://github.com/docker/compose/releases/download/1.27.4/docker-compo
 chmod +x /usr/local/bin/docker-compose
 docker-compose --version
 yum install -y git
-git clone https://github.com/Arvind-Jagirala/ITGlue_Repo.git 
-nohup docker-compose up --build  &
+git clone https://github.com/Arvind-Jagirala/ITGlue_Repo.git

@@ -12,5 +12,9 @@
         mode: 0755
 
     - name: Run docker in the server
-      shell: nohup /opt/dockersetup.sh > /dev/null 2>&1 &
+      shell: /opt/dockersetup.sh
 
+    - name: Run  application in the server
+      command: docker-compose up --build 
+      args:
+        chdir: /root/ITGlue_Repo
