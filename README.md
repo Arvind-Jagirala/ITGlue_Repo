@@ -64,6 +64,7 @@ In addition to the above mentioned prerequisites, we need a Jenkins server with 
 For Approach 1, use below command to delete the resource stack
 *# aws cloudformation delete-stack --stack-name ec2-stack --template-body file://cfscript.yml --parameters ParameterKey=Key,ParameterValue=Test_Ec2_Private
 For Approach 2, use below command to delete the resource stack
+
 *# aws cloudformation delete-stack --stack-name ec2-stack --template-body file://cloudformationtemplate.yml --parameters ParameterKey=Key,ParameterValue=Test_Ec2_Private
 
 
